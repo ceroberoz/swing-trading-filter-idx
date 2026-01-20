@@ -18,7 +18,7 @@ Swing trading means holding stocks for **3-10 days** to capture short-term price
 
 ```bash
 # 1. Download the project
-git clone https://github.com/yourusername/swing-trading-filter-idx.git
+git clone https://github.com/ceroberoz/swing-trading-filter-idx.git
 cd swing-trading-filter-idx
 
 # 2. Create isolated environment (recommended)
