@@ -1,0 +1,50 @@
+# Future Development Plan - Swing Trading Filter (IDX)
+
+## Phase 1: Strategy Refinement & Validation
+- [ ] **Backtesting Engine:** Implement a backtester to simulate the strategy over the past 2-3 years to calculate Win Rate, Max Drawdown, and Expectancy.
+- [X] **Adaptive Parameters:** Experiment with different EMA lengths (e.g., 10/20 for faster swing) or RSI thresholds based on market conditions (Bull vs Bear market).
+      - Implemented: EMA 13/34, RSI 75/35, optimized for IDX volatility
+- [ ] **Trailing Stop:** Implement a trailing stop mechanism (e.g., using Chandelier Exit or simply moving SL to breakeven after a certain profit %).
+- [ ] **Candlestick Patterns:** Integrate recognition of bullish reversal patterns (Hammer, Engulfing) as an additional confirmation filter.
+
+## Phase 2: Fundamental & Sector Filtering
+- [ ] **Fundamental Data:** Fetch and filter by P/E Ratio, PBV, and Dividend Yield (requires a more comprehensive data source).
+- [X] **Market Cap Filter:** Option to filter out small-cap stocks (Gorengan) to reduce risk.
+      - Implemented: MIN_MARKET_CAP = 10T IDR (configurable)
+      - Displays MCap column (e.g., 992.1T, 97.3T)
+      - Shows count of skipped small-cap stocks
+- [ ] **Sector Rotation:** Identify leading sectors and prioritize stocks within those sectors.
+
+## Phase 3: Automation & Alerts
+- [ ] **Automated Cron Job:** Setup a daily scheduler (e.g., GitHub Actions or local crontab) to run the scan at market close.
+- [ ] **Notification System:** Send alerts via Telegram, Email, or Discord when a new "BUY" setup is found.
+- [X] **Watchlist Management:** Allow users to maintain a persistent `watchlist.txt` instead of editing `config.py`.
+      - Implemented: watchlists/ folder with default.txt, lq45.txt, idx_liquid.txt
+      - CLI support: --list flag to select watchlist
+
+## Phase 4: Application & UI
+- [ ] **Web Dashboard:** Create a simple Streamlit or Flask web app to visualize charts and signals interactively.
+- [ ] **Portfolio Tracker:** A simple CLI tool to log "Paper Trades" or real entries and track performance over time.
+- [ ] **Export to TradingView:** Generate a text list that can be imported into TradingView watchlists.
+
+## Phase 5: Advanced Features
+- [X] **Multi-Timeframe Analysis:** Check weekly charts for trend alignment before taking a daily signal.
+      - Implemented: Weekly EMA 10/30 trend alignment
+      - Resamples daily data to weekly (no extra API calls)
+      - Shows W.Trend column (UP/DOWN)
+- [X] **Market Breadth:** Analyze overall market health (IHSG trend) to determine if the system should be aggressive or defensive.
+      - Implemented: ^JKSE EMA 20/100 regime detection
+      - RISK_ON / RISK_OFF status displayed
+      - TAG mode (affects scoring, doesn't hard-block)
+
+## Phase 6: Additional Features (Implemented)
+- [X] **Support/Resistance Analysis:** Pivot points and swing high/low detection
+      - Classic pivot points from previous day OHLC
+      - 20-day swing high/low levels
+      - S/R column shows nearest support/resistance
+      - Affects investment strategy scoring
+- [X] **Investment Strategy Recommendations:** BUY ALL, BUY PARTIAL, HOLD, SELL PARTIAL, SELL ALL
+      - Scoring based on: signal, weekly trend, market regime, RSI, volume, S/R position
+- [X] **Volume Ratio Filter:** Minimum 1.2x volume ratio for quality signals
+- [X] **Optimized Parameters:** Config tuned for IDX swing trading (3-10 day holds)
+      - EMA 13/34, RSI 75/35, ATR 2.0x, Target 3-12%

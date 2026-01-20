@@ -1,0 +1,2 @@
+# Default Watchlist
+# Add your favorite stocks here (one per line, with or without .JK suffix)
