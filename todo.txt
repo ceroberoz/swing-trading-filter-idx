@@ -1,50 +1,119 @@
 # Future Development Plan - Swing Trading Filter (IDX)
 
-## Phase 1: Strategy Refinement & Validation
-- [ ] **Backtesting Engine:** Implement a backtester to simulate the strategy over the past 2-3 years to calculate Win Rate, Max Drawdown, and Expectancy.
-- [X] **Adaptive Parameters:** Experiment with different EMA lengths (e.g., 10/20 for faster swing) or RSI thresholds based on market conditions (Bull vs Bear market).
-      - Implemented: EMA 13/34, RSI 75/35, optimized for IDX volatility
-- [ ] **Trailing Stop:** Implement a trailing stop mechanism (e.g., using Chandelier Exit or simply moving SL to breakeven after a certain profit %).
-- [ ] **Candlestick Patterns:** Integrate recognition of bullish reversal patterns (Hammer, Engulfing) as an additional confirmation filter.
+## ✅ COMPLETED FEATURES
 
-## Phase 2: Fundamental & Sector Filtering
-- [ ] **Fundamental Data:** Fetch and filter by P/E Ratio, PBV, and Dividend Yield (requires a more comprehensive data source).
-- [X] **Market Cap Filter:** Option to filter out small-cap stocks (Gorengan) to reduce risk.
-      - Implemented: MIN_MARKET_CAP = 10T IDR (configurable)
-      - Displays MCap column (e.g., 992.1T, 97.3T)
-      - Shows count of skipped small-cap stocks
-- [ ] **Sector Rotation:** Identify leading sectors and prioritize stocks within those sectors.
+### Strategy & Analysis
+- **Backtesting Engine** - Test strategies on past data to see what works
+  - View win rate, profit potential, and risk metrics
+  - Generate performance charts and detailed reports
+  - Command: --backtest, --start-date, --end-date, --detailed, --charts
 
-## Phase 3: Automation & Alerts
-- [ ] **Automated Cron Job:** Setup a daily scheduler (e.g., GitHub Actions or local crontab) to run the scan at market close.
-- [ ] **Notification System:** Send alerts via Telegram, Email, or Discord when a new "BUY" setup is found.
-- [X] **Watchlist Management:** Allow users to maintain a persistent `watchlist.txt` instead of editing `config.py`.
-      - Implemented: watchlists/ folder with default.txt, lq45.txt, idx_liquid.txt
-      - CLI support: --list flag to select watchlist
+- **Multi-Timeframe Analysis** - Check both daily and weekly trends
+  - Weekly trend alignment (10/30 moving averages)
+  - Shows "W.Trend" column (UP/DOWN)
 
-## Phase 4: Application & UI
-- [ ] **Web Dashboard:** Create a simple Streamlit or Flask web app to visualize charts and signals interactively.
-- [ ] **Portfolio Tracker:** A simple CLI tool to log "Paper Trades" or real entries and track performance over time.
-- [ ] **Export to TradingView:** Generate a text list that can be imported into TradingView watchlists.
+- **Market Condition Filter** - Identifies overall market health
+  - Detects bull market (RISK_ON) vs bear market (RISK_OFF) conditions
+  - Based on Jakarta Composite Index (^JKSE) trend
+  - Affects signal quality scoring
 
-## Phase 5: Advanced Features
-- [X] **Multi-Timeframe Analysis:** Check weekly charts for trend alignment before taking a daily signal.
-      - Implemented: Weekly EMA 10/30 trend alignment
-      - Resamples daily data to weekly (no extra API calls)
-      - Shows W.Trend column (UP/DOWN)
-- [X] **Market Breadth:** Analyze overall market health (IHSG trend) to determine if the system should be aggressive or defensive.
-      - Implemented: ^JKSE EMA 20/100 regime detection
-      - RISK_ON / RISK_OFF status displayed
-      - TAG mode (affects scoring, doesn't hard-block)
+- **Support & Resistance Levels** - Key price zones for entry/exit planning
+  - Pivot points (price levels where trends may reverse)
+  - 20-day high/low swing levels
+  - Shown in "S/R" column
 
-## Phase 6: Additional Features (Implemented)
-- [X] **Support/Resistance Analysis:** Pivot points and swing high/low detection
-      - Classic pivot points from previous day OHLC
-      - 20-day swing high/low levels
-      - S/R column shows nearest support/resistance
-      - Affects investment strategy scoring
-- [X] **Investment Strategy Recommendations:** BUY ALL, BUY PARTIAL, HOLD, SELL PARTIAL, SELL ALL
-      - Scoring based on: signal, weekly trend, market regime, RSI, volume, S/R position
-- [X] **Volume Ratio Filter:** Minimum 1.2x volume ratio for quality signals
-- [X] **Optimized Parameters:** Config tuned for IDX swing trading (3-10 day holds)
-      - EMA 13/34, RSI 75/35, ATR 2.0x, Target 3-12%
+- **Investment Recommendations** - Clear action suggestions
+  - BUY ALL, BUY PARTIAL, HOLD, SELL PARTIAL, SELL ALL
+  - Based on signal strength, trend, market conditions, and price position
+
+### Filtering & Quality Control
+- **Market Cap Filter** - Skip very small stocks (minimum 10 trillion IDR)
+  - Reduces exposure to highly volatile penny stocks
+  - Configurable threshold in config.py
+
+- **Volume Filter** - Requires 1.2x average volume
+  - Ensures sufficient trading activity
+  - Improves signal reliability
+
+- **Optimized Parameters** - Fine-tuned for Indonesian market
+  - Moving averages: 13/34 periods
+  - RSI thresholds: 75 (overbought) / 35 (oversold)
+  - Stop-loss: 2.0x ATR (Average True Range - volatility measure)
+  - Target: 3-12% profit
+
+### Watchlist Management
+- **Multiple Watchlists** - Pre-configured stock lists
+  - default.txt - Your personal picks
+  - lq45.txt - Blue chip stocks (LQ45 index)
+  - idx_liquid.txt - 100+ actively traded stocks
+  - Command: --list [name]
+
+---
+
+## 📋 PLANNED FEATURES
+
+### Phase 1: Better Entry & Exit Rules
+- [ ] **Trailing Stop Loss** - Automatically move stop-loss as price rises
+      - Locks in profits without manual intervention
+      - Example: Move stop to breakeven after 3% gain
+
+- [ ] **Candlestick Patterns** - Recognize reversal signals
+      - Hammer, Engulfing (visual price patterns on charts)
+      - Additional confirmation before buying
+
+### Phase 2: Fundamental Analysis
+- [ ] **Financial Ratios** - Filter by company fundamentals
+      - P/E Ratio (Price to Earnings - valuation metric)
+      - PBV (Price to Book Value)
+      - Dividend Yield (income from stock ownership)
+      - Requires additional data source beyond Yahoo Finance
+
+- [ ] **Sector Analysis** - Identify which industries are performing best
+      - Focus on leading sectors during scans
+      - Rotate strategy based on sector strength
+
+### Phase 3: Automation
+- [ ] **Scheduled Scans** - Run automatically at market close
+      - Using GitHub Actions or local scheduler
+      - No manual intervention needed
+
+- [ ] **Alert Notifications** - Get notified of new opportunities
+      - Telegram, Email, or Discord alerts
+      - Instant updates when buy signals appear
+
+### Phase 4: User Interface
+- [ ] **Web Dashboard** - Visual charts and interactive signals
+      - Using Streamlit or Flask framework
+      - Easier than command-line interface
+
+- [ ] **Trade Tracker** - Log and monitor your trades
+      - Paper trading (practice mode) support
+      - Performance tracking over time
+
+- [ ] **TradingView Export** - Export watchlist for charting platform
+      - Direct import into TradingView
+      - Professional charting with our signals
+
+### Phase 5: Advanced Analysis
+- [ ] **Parameter Optimization** - Find best settings automatically
+      - Test different moving average periods
+      - Test different RSI thresholds
+      - Discover optimal configuration for your style
+
+- [ ] **Walk-Forward Testing** - Validate strategy robustness
+      - Rolling window optimization
+      - Prevents over-fitting to past data
+
+- [ ] **Market Regime Comparison** - Performance across conditions
+      - How strategy performs in bull vs bear markets
+      - Helps set realistic expectations
+
+---
+
+## 📝 NOTES
+
+**Current Focus:** The tool is production-ready for daily swing trading scans with backtesting capability.
+
+**Next Priority:** Trailing stop-loss and automated notifications for hands-free operation.
+
+**Data Limitation:** Yahoo Finance provides technical data only. Fundamental ratios require paid data sources.

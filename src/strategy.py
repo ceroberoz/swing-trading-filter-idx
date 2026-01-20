@@ -329,30 +329,33 @@ def analyze_ticker(df, market_ctx=None):
     if df is None or len(df) < max(config.SLOW_EMA, config.MACD_SLOW + config.MACD_SIGNAL, config.ATR_PERIOD):
         return None
 
+    # Create a copy to avoid SettingWithCopyWarning
+    df = df.copy()
+
     # Handle yfinance multi-index if necessary
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
     # Convert all columns to numeric and handle potential NaNs
     for col in ['Close', 'Open', 'High', 'Low', 'Volume']:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
+        df.loc[:, col] = pd.to_numeric(df[col], errors='coerce')
     
     df = df.dropna(subset=['Close'])
     close = df['Close']
     volume = df['Volume']
     
     # Calculate Indicators
-    df['EMA_Fast'] = calculate_ema(close, config.FAST_EMA)
-    df['EMA_Slow'] = calculate_ema(close, config.SLOW_EMA)
-    df['RSI'] = calculate_rsi(close, config.RSI_PERIOD)
-    df['ATR'] = calculate_atr(df, config.ATR_PERIOD)
+    df.loc[:, 'EMA_Fast'] = calculate_ema(close, config.FAST_EMA)
+    df.loc[:, 'EMA_Slow'] = calculate_ema(close, config.SLOW_EMA)
+    df.loc[:, 'RSI'] = calculate_rsi(close, config.RSI_PERIOD)
+    df.loc[:, 'ATR'] = calculate_atr(df, config.ATR_PERIOD)
     
     macd_line, signal_line, hist = calculate_macd(close, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL)
-    df['MACD'] = macd_line
-    df['MACD_Signal'] = signal_line
-    df['MACD_Hist'] = hist
+    df.loc[:, 'MACD'] = macd_line
+    df.loc[:, 'MACD_Signal'] = signal_line
+    df.loc[:, 'MACD_Hist'] = hist
     
-    df['Vol_Avg'] = volume.rolling(window=config.VOL_AVG_PERIOD).mean()
+    df.loc[:, 'Vol_Avg'] = volume.rolling(window=config.VOL_AVG_PERIOD).mean()
 
     if len(df) < 2:
         return None

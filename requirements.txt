@@ -2,3 +2,7 @@ yfinance
 pandas
 tabulate
 colorama
+backtesting
+matplotlib
+seaborn
+numpy

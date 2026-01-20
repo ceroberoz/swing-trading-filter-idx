@@ -86,3 +86,19 @@ MARKET_HISTORY_PERIOD = "2y"   # More history for stable EMA100
 MARKET_FAST_EMA = 20
 MARKET_SLOW_EMA = 100          # Smoother regime, reduces whipsaws
 MARKET_FILTER_MODE = "TAG"     # Don't hard-block, use scoring instead
+
+# ---- Backtesting Configuration ----
+BACKTEST_START_DATE = "2022-01-01"
+BACKTEST_END_DATE = "2024-12-31"
+INITIAL_CAPITAL = 100000000  # 100M IDR
+
+# Risk Management
+RISK_PER_TRADE = 0.01        # 1% risk per trade
+MAX_POSITION_EXPOSURE = 0.20  # 20% max exposure per position
+MAX_CONCURRENT_POSITIONS = 5 # Max number of open positions
+MAX_TOTAL_EXPOSURE = 0.80    # 80% max total portfolio exposure
+MAX_VOLUME_PARTICIPATION = 0.05  # Max 5% of daily volume
+
+# Cost Structure
+COMMISSION_RATE = 0.002      # 0.2% commission per trade
+SLIPPAGE_RATE = 0.002        # 0.2% average slippage

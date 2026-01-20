@@ -9,6 +9,7 @@ import pandas as pd
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src import config, data, strategy
+from src.backtest import BacktestEngine, BacktestReport
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -16,10 +17,18 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # Live Scanning
   python -m src.main                    # Show only crossover setups from default watchlist
   python -m src.main --list lq45        # Show ALL stocks from LQ45 watchlist
   python -m src.main --list idx_liquid  # Show ALL stocks from liquid IDX watchlist
   python -m src.main BBCA BBRI ANTM     # Show specific tickers
+  
+  # Backtesting
+  python -m src.main --backtest                               # Backtest default watchlist (2022-2024)
+  python -m src.main --backtest --list lq45                   # Backtest LQ45 stocks
+  python -m src.main --backtest BBCA BBRI ANTM               # Backtest specific tickers
+  python -m src.main --backtest --start-date 2022-01-01 --end-date 2023-12-31
+  python -m src.main --backtest --detailed --charts           # Full analysis with charts
         """
     )
     parser.add_argument('tickers', nargs='*', help='Specific tickers to scan')
@@ -27,6 +36,19 @@ Examples:
                         help='Watchlist name (default, lq45, idx_liquid) - shows ALL stocks from list')
     parser.add_argument('--show-lists', action='store_true',
                         help='Show available watchlists')
+    
+    # Backtesting arguments
+    parser.add_argument('--backtest', action='store_true',
+                        help='Run backtesting instead of live scan')
+    parser.add_argument('--start-date', dest='start_date',
+                        help='Backtest start date (YYYY-MM-DD)')
+    parser.add_argument('--end-date', dest='end_date',
+                        help='Backtest end date (YYYY-MM-DD)')
+    parser.add_argument('--detailed', action='store_true',
+                        help='Show detailed backtest report for each ticker')
+    parser.add_argument('--charts', action='store_true',
+                        help='Generate performance charts')
+    
     return parser.parse_args()
 
 def show_available_lists():
@@ -38,6 +60,66 @@ def show_available_lists():
             count = len(config.load_watchlist(name))
             print(f"  {name:15} ({count} stocks)")
 
+def run_backtest(args):
+    """Run backtesting engine"""
+    print(f"{Style.BRIGHT}{Fore.CYAN}Starting Swing Trading Backtesting...{Style.RESET_ALL}")
+    
+    # Determine tickers to backtest
+    if args.tickers:
+        tickers_to_test = [t if t.endswith(".JK") else f"{t.upper()}.JK" for t in args.tickers]
+        test_mode = "Manual Selection"
+    elif args.watchlist:
+        tickers_to_test = config.load_watchlist(args.watchlist)
+        test_mode = f"Watchlist: {args.watchlist}"
+    else:
+        tickers_to_test = config.load_watchlist("idx_liquid")  # Default to liquid stocks
+        test_mode = "Watchlist: idx_liquid (default)"
+    
+    print(f"Mode: {test_mode}")
+    print(f"Tickers: {len(tickers_to_test)}")
+    
+    # Initialize backtest engine
+    engine = BacktestEngine(
+        start_date=args.start_date or config.BACKTEST_START_DATE,
+        end_date=args.end_date or config.BACKTEST_END_DATE,
+        initial_cash=config.INITIAL_CAPITAL,
+        commission=config.COMMISSION_RATE
+    )
+    
+    print(f"Period: {engine.start_date} to {engine.end_date}")
+    print(f"Initial Capital: {engine.initial_cash:,} IDR")
+    print(f"Commission: {engine.commission*100:.1f}% per trade")
+    print(f"Risk per Trade: {config.RISK_PER_TRADE*100:.1f}%")
+    print("-" * 60)
+    
+    # Run backtest
+    print("Running backtest...")
+    results = engine.run_backtest(tickers_to_test)
+    
+    if 'error' in results:
+        print(f"{Fore.RED}Backtest failed: {results['error']}{Style.RESET_ALL}")
+        return
+    
+    # Generate report
+    report_generator = BacktestReport()
+    
+    if args.detailed:
+        # Show detailed reports for each ticker
+        for ticker, ticker_result in results.get('ticker_results', {}).items():
+            print(report_generator.generate_detailed_ticker_report(ticker, ticker_result))
+            print("-" * 60)
+    else:
+        # Show summary report
+        print(report_generator.generate_summary_report(results))
+    
+    # Generate charts if requested
+    if args.charts:
+        print(f"\n{Fore.CYAN}Generating performance charts...{Style.RESET_ALL}")
+        chart_path = "backtest_performance.png"
+        report_generator.create_performance_charts(results, save_path=chart_path)
+    
+    return results
+
 def main():
     init(autoreset=True)
     args = parse_args()
@@ -46,6 +128,12 @@ def main():
         show_available_lists()
         return
     
+    # Check if backtest mode
+    if args.backtest:
+        run_backtest(args)
+        return
+    
+    # Original scanning logic
     if args.tickers:
         tickers_to_scan = [t if t.endswith(".JK") else f"{t.upper()}.JK" for t in args.tickers]
         scan_mode = "Manual Selection"
