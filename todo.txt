@@ -27,19 +27,44 @@
   - Based on signal strength, trend, market conditions, and price position
 
 ### Filtering & Quality Control
-- **Market Cap Filter** - Skip very small stocks (minimum 10 trillion IDR)
+- **Market Cap Filter** - Skip very small stocks (minimum 5 trillion IDR)
   - Reduces exposure to highly volatile penny stocks
+  - Now includes quality mid-cap stocks (5-10T IDR range)
   - Configurable threshold in config.py
 
 - **Volume Filter** - Requires 1.2x average volume
   - Ensures sufficient trading activity
   - Improves signal reliability
 
-- **Optimized Parameters** - Fine-tuned for Indonesian market
-  - Moving averages: 13/34 periods
+- **Optimized Parameters** - Fine-tuned for Indonesian market (Updated Jan 2026)
+  - Moving averages: 13/34 periods (fast trend capture)
   - RSI thresholds: 75 (overbought) / 35 (oversold)
-  - Stop-loss: 2.0x ATR (Average True Range - volatility measure)
-  - Target: 3-12% profit
+  - Stop-loss: 1.5x ATR (tighter stops for smaller losses)
+  - Target: 3-10% profit (more realistic for 3-10 day swings)
+  - Market regime: 13/50 EMA (faster response to trend changes)
+  - Total exposure: 60% max (keeps 40% dry powder)
+  - Commission: 0.15% (accurate for IDX brokers)
+
+### Optional Advanced Filters (New - Jan 2026)
+- **Sector Filters** - Prefer or avoid specific industries
+  - Preferred: Banking, Infrastructure, Consumer, Telecom
+  - Avoided: Mining, Construction (too volatile/cyclical)
+  - Activate: Set ENABLE_SECTOR_FILTER = True
+
+- **Volatility Filter** - Avoid excessive price swings
+  - Maximum 5% daily volatility
+  - Filters out manipulated or news-driven stocks
+  - Activate: Set ENABLE_VOLATILITY_FILTER = True
+
+- **Dividend Yield Filter** - Focus on income stocks
+  - Minimum 2% dividend yield
+  - Targets stable, dividend-paying companies
+  - Activate: Set ENABLE_DIVIDEND_FILTER = True
+
+- **Market Cap Tiering** - Different rules per company size
+  - Large cap (>50T), Mid cap (10-50T), Small cap (5-10T)
+  - Apply stricter filters to smaller companies
+  - Activate: Set ENABLE_TIERED_FILTER = True
 
 ### Watchlist Management
 - **Multiple Watchlists** - Pre-configured stock lists

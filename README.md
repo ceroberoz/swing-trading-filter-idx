@@ -14,6 +14,36 @@ Swing trading means holding stocks for **3-10 days** to capture short-term price
 ✅ **Tests strategies** on historical data to see what works  
 ✅ **Filters out risky stocks** - skips very small or illiquid stocks automatically  
 
+## 🔧 Recent Updates & Optimizations (January 2026)
+
+The configuration has been optimized for the Indonesian market:
+
+### Better Risk Management
+- **Tighter Stop Losses** - Now 1.5x ATR instead of 2x, meaning smaller losses when trades go wrong
+- **Realistic Profit Targets** - 3-10% range instead of 3-12%, more achievable for short-term swings
+- **Conservative Exposure** - Maximum 60% invested (instead of 80%), keeps 40% cash ready for opportunities
+
+### Faster Market Response
+- **Market Regime Detection** - Updated to 13/50 EMA (from 20/100) for quicker bull/bear market signals
+- This helps you avoid buying when the overall market is turning negative
+
+### Broader Stock Universe
+- **Lower Market Cap Filter** - Now includes stocks above 5 trillion IDR (was 10T)
+- More quality mid-cap stocks added without including risky "gorengan"
+
+### Accurate Cost Modeling
+- **Commission Rate** - Updated to 0.15% (typical for IDX brokers like BCA Sekuritas, Mandiri Sekuritas)
+- Better backtesting results that reflect real trading costs
+
+### New Optional Filters (Disabled by Default)
+You can now activate advanced filters in `src/config.py`:
+- **Sector Filter** - Prefer banking/infrastructure, avoid mining/construction
+- **Volatility Filter** - Skip stocks with >5% daily moves (avoid manipulated stocks)
+- **Dividend Filter** - Focus on stocks paying 2%+ dividends (stable companies)
+- **Market Cap Tiering** - Apply stricter rules to smaller companies
+
+These features are designed to give you more control while keeping the default settings beginner-friendly and conservative.  
+
 ## Installation
 
 ```bash
@@ -84,7 +114,7 @@ python -m src.main --backtest --detailed --charts
 | **Signal** | Trading signal based on trend analysis |
 | **Price** | Current stock price (in IDR) |
 | **S/R** | Support/Resistance - key price levels to watch |
-| **RSI** | Momentum indicator (0-100): <30 = oversold, >70 = overbought |
+| **RSI** | Momentum indicator (0-100): <35 = oversold, >75 = overbought |
 | **W.Trend** | Weekly trend direction (UP or DOWN) |
 | **MCap** | Market capitalization - company size (in trillions IDR) |
 | **Strategy** | Recommended action based on all factors |
@@ -119,21 +149,74 @@ Simply add stock tickers (e.g., BBCA.JK, TLKM.JK) one per line.
 
 Edit `src/config.py` to customize:
 
-- **MIN_MARKET_CAP** - Minimum company size (default: 10 trillion IDR)
-- **EMA_SHORT / EMA_LONG** - Moving average periods for trend detection
-- **RSI_PERIOD** - Momentum calculation period
-- **PROFIT_TARGET_PCT** - Your profit goal (default: 5-10%)
-- **STOP_LOSS_PCT** - Maximum acceptable loss (default: 2-5%)
+- **MIN_MARKET_CAP** - Minimum company size (default: 5 trillion IDR)
+  - Filters out very small/risky stocks while including quality mid-caps
+  - Lower value = more stocks to scan, higher = safer but fewer opportunities
+
+- **FAST_EMA / SLOW_EMA** - Moving average periods for trend detection (default: 13/34)
+  - Controls how quickly signals appear
+  - Smaller numbers = more signals (faster), larger = fewer signals (more reliable)
+
+- **RSI_PERIOD** - Momentum calculation period (default: 14)
+  - RSI_OVERBOUGHT (default: 75) - Avoid buying when stock is too expensive
+  - RSI_OVERSOLD (default: 35) - Find bargains when stock is undervalued
+
+- **TARGET_PROFIT_PCT** - Your profit goal (default: 6%)
+  - TARGET_PROFIT_MIN (default: 3%) - Minimum acceptable gain
+  - TARGET_PROFIT_MAX (default: 10%) - Maximum realistic gain for 3-10 day swings
+  - Smaller values = more frequent exits, larger = hold longer for bigger gains
+
+- **STOP_LOSS_PCT** - Maximum acceptable loss (default: 3%)
+  - ATR_MULTIPLIER (default: 1.5) - Dynamic stop loss based on volatility
+  - Smaller value = cut losses faster (safer), larger = give more room (risky)
+
+- **MARKET_FAST_EMA / MARKET_SLOW_EMA** - Market health detection (default: 13/50)
+  - Monitors Jakarta Composite Index (^JKSE) trend
+  - Helps avoid buying during bear markets
+  - Faster periods (13/50) = respond quicker to market changes
+
+- **RISK_PER_TRADE** - How much to risk per trade (default: 1%)
+  - 1% means you only lose 1% of your account if stop loss is hit
+  - Conservative traders: 0.5%, Aggressive traders: 2%
+
+- **MAX_TOTAL_EXPOSURE** - Maximum money invested at once (default: 60%)
+  - 60% means keeping 40% cash available for new opportunities
+  - Lower = more conservative (safer), Higher = more aggressive (riskier)
+
+### Advanced Optional Filters
+
+These features are turned **OFF by default**. Edit `src/config.py` and set them to `True` to activate:
+
+- **ENABLE_SECTOR_FILTER** - Prefer/avoid specific industries
+  - Preferred: Banking, Infrastructure, Consumer, Telecom (stable, good trends)
+  - Avoided: Mining, Construction (too volatile or cyclical)
+  - Good for: Focusing on sectors you know or trust
+
+- **ENABLE_VOLATILITY_FILTER** - Avoid excessive price swings
+  - Max 5% daily movement allowed
+  - Filters out manipulated or news-driven stocks
+  - Good for: Avoiding unexpected sharp drops
+
+- **ENABLE_DIVIDEND_FILTER** - Focus on income stocks
+  - Minimum 2% dividend yield required
+  - Targets stable, dividend-paying companies
+  - Good for: Long-term wealth building with regular income
+
+- **ENABLE_TIERED_FILTER** - Different rules for company sizes
+  - Large cap (>50T): Most liquid, blue chip stocks
+  - Mid cap (10-50T): Balanced liquidity and growth
+  - Small cap (5-10T): More volatile but higher growth potential
+  - Good for: Applying stricter rules to riskier stocks
 
 ## Key Features Explained
 
 ### 🔍 What the Tool Analyzes
 
 1. **Trend Detection** - Uses moving averages (13/34 periods) to identify when prices start rising or falling
-2. **Momentum** - RSI indicator shows if stock is overbought (too expensive) or oversold (potential bargain)
+2. **Momentum** - RSI indicator shows if stock is overbought (too expensive, >75) or oversold (potential bargain, <35)
 3. **Volume** - Requires 1.2x average trading volume to ensure signal quality
-4. **Weekly Trend** - Checks longer timeframe to confirm direction
-5. **Market Condition** - Monitors Jakarta Composite Index for overall market health
+4. **Weekly Trend** - Checks longer timeframe (weekly EMA10/30) to confirm direction
+5. **Market Condition** - Monitors Jakarta Composite Index (13/50 EMA) for overall market health
 6. **Support/Resistance** - Identifies price levels where stock typically bounces or stalls
 
 ### 📊 Backtesting Features
@@ -147,9 +230,9 @@ Edit `src/config.py` to customize:
 ### 🛡️ Risk Management
 
 - **Position Sizing** - Automatically calculates how much to invest per trade (1% account risk)
-- **Stop Loss** - Uses ATR (Average True Range) - 2x the stock's typical daily movement
-- **Take Profit** - Targets 3-12% gains based on market conditions
-- **Market Cap Filter** - Skips stocks below 10 trillion IDR to avoid high-risk penny stocks
+- **Stop Loss** - Uses ATR (Average True Range) - 1.5x the stock's typical daily movement
+- **Take Profit** - Targets 3-10% gains based on market conditions
+- **Market Cap Filter** - Skips stocks below 5 trillion IDR to avoid high-risk penny stocks (includes quality mid-caps)
 
 ## Glossary
 

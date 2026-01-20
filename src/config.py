@@ -54,7 +54,7 @@ MACD_SIGNAL = 9
 
 # ATR Parameters (Dynamic SL - wider for IDX volatility)
 ATR_PERIOD = 14
-ATR_MULTIPLIER = 2.0   # SL = Close - (ATR * 2.0), wider for gaps/volatility
+ATR_MULTIPLIER = 1.5   # SL = Close - (ATR * 1.5), tighter stops for smaller losses
 
 # Volume Parameters
 VOL_AVG_PERIOD = 20
@@ -63,14 +63,41 @@ VOL_RATIO_MIN = 1.2            # Minimum volume ratio for quality signals
 
 # Market Cap Filter (skip small-cap "gorengan")
 ENABLE_MCAP_FILTER = True
-MIN_MARKET_CAP = 10e12         # 10 Trillion IDR minimum (adjust as needed)
+MIN_MARKET_CAP = 5e12          # 5 Trillion IDR minimum (expands to quality mid-caps)
 # Reference: Large Cap > 50T, Mid Cap 10-50T, Small Cap < 10T
+
+# Market Cap Tiering (optional - for tiered filtering rules)
+MARKET_CAP_TIERS = {
+    'large_cap': 50e12,    # > 50T IDR (most liquid, blue chips)
+    'mid_cap': 10e12,       # 10-50T IDR
+    'small_cap': 5e12,      # 5-10T IDR (quality mid-caps, some gorengan)
+}
+ENABLE_TIERED_FILTER = False  # Set True to apply different rules per tier
+
+# Sector Filters (optional - prefer/avoid specific IDX sectors)
+SECTOR_FILTER = {
+    'BANKING': {'preferred': True, 'min_market_cap': 20e12},
+    'INFRASTRUCTURE': {'preferred': True, 'min_market_cap': 15e12},
+    'CONSUMER': {'preferred': True, 'min_market_cap': 10e12},
+    'TELECOMMUNICATION': {'preferred': True, 'min_market_cap': 15e12},
+    'MINING': {'preferred': False, 'min_market_cap': 50e12},  # Too volatile
+    'CONSTRUCTION': {'preferred': False, 'min_market_cap': 30e12},  # Cyclical
+}
+ENABLE_SECTOR_FILTER = False  # Set True to activate sector filtering
+
+# Volatility Filter (optional - avoid excessively volatile stocks)
+ATR_PCT_MAX = 0.05  # Max 5% daily volatility (avoid manipulated/news-driven)
+ENABLE_VOLATILITY_FILTER = False  # Set True to activate
+
+# Dividend Yield Filter (optional - prefer dividend-paying stocks)
+MIN_DIVIDEND_YIELD = 0.02  # Minimum 2% dividend yield
+ENABLE_DIVIDEND_FILTER = False  # Set True to activate
 
 # Risk Management (realistic for weekly swings after fees/spreads)
 TARGET_PROFIT_MIN = 0.03  # Minimum 3% profit target
-TARGET_PROFIT_MAX = 0.12  # Maximum 12% profit target
+TARGET_PROFIT_MAX = 0.10  # Maximum 10% profit target (more realistic for 3-10 day swings)
 TARGET_PROFIT_PCT = 0.06  # Default 6% target for better R:R
-STOP_LOSS_PCT = 0.04      # 4% fallback (breathing room for pullbacks)
+STOP_LOSS_PCT = 0.03      # 3% fallback (tighter stop loss)
 
 # ---- Multi-timeframe (faster for swing horizon) ----
 ENABLE_MTF = True
@@ -83,8 +110,8 @@ ENABLE_MARKET_FILTER = True
 MARKET_TICKER = "^JKSE"
 MARKET_TIMEFRAME = "1d"
 MARKET_HISTORY_PERIOD = "2y"   # More history for stable EMA100
-MARKET_FAST_EMA = 20
-MARKET_SLOW_EMA = 100          # Smoother regime, reduces whipsaws
+MARKET_FAST_EMA = 13
+MARKET_SLOW_EMA = 50           # Faster response to market regime changes
 MARKET_FILTER_MODE = "TAG"     # Don't hard-block, use scoring instead
 
 # ---- Backtesting Configuration ----
@@ -96,9 +123,9 @@ INITIAL_CAPITAL = 100000000  # 100M IDR
 RISK_PER_TRADE = 0.01        # 1% risk per trade
 MAX_POSITION_EXPOSURE = 0.20  # 20% max exposure per position
 MAX_CONCURRENT_POSITIONS = 5 # Max number of open positions
-MAX_TOTAL_EXPOSURE = 0.80    # 80% max total portfolio exposure
+MAX_TOTAL_EXPOSURE = 0.60    # 60% max total portfolio exposure (keeps 40% dry powder)
 MAX_VOLUME_PARTICIPATION = 0.05  # Max 5% of daily volume
 
 # Cost Structure
-COMMISSION_RATE = 0.002      # 0.2% commission per trade
+COMMISSION_RATE = 0.0015     # 0.15% commission per trade (typical for IDX brokers)
 SLIPPAGE_RATE = 0.002        # 0.2% average slippage
