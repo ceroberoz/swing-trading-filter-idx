@@ -44,6 +44,30 @@ You can now activate advanced filters in `src/config.py`:
 
 These features are designed to give you more control while keeping the default settings beginner-friendly and conservative.  
 
+## 📁 Project Structure
+
+The project is organized as follows:
+
+```
+swing-trading-filter-idx/
+├── src/                # Source code (strategy, data fetching, backtesting)
+├── docs/               # Documentation (guides, API reference)
+├── watchlists/         # Stock lists (LQ45, IDX liquid, custom)
+├── output/             # Generated files (scans, backtests, charts)
+├── logs/               # Application logs (ignored by git)
+├── scripts/            # Utility scripts (automation, maintenance)
+├── cache/              # Data cache (yfinance, ignored by git)
+└── README.md           # This file
+```
+
+**Key Directories:**
+- **`src/`** - All Python code lives here
+- **`watchlists/`** - Add your custom stock lists here
+- **`output/`** - Scan results and charts are saved here (not tracked by git)
+- **`docs/`** - Full documentation including setup guides
+
+📖 **See [`docs/DIRECTORY_STRUCTURE.md`](docs/DIRECTORY_STRUCTURE.md) for complete details.**
+
 ## Installation
 
 ```bash

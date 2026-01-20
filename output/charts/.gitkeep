@@ -1,0 +1,40 @@
+# Charts Directory
+
+This directory stores generated charts and visualizations from backtesting and analysis.
+
+## File Types
+
+### Backtest Charts
+- `backtest_performance.png` - Overall equity curve and drawdown
+- `backtest_returns_distribution.png` - Distribution of returns
+- `backtest_monthly_heatmap.png` - Monthly returns heatmap
+- `backtest_sharpe_evolution.png` - Sharpe ratio over time
+
+### Analysis Charts
+- `sector_performance.png` - Sector-wise performance comparison
+- `win_rate_by_ticker.png` - Win rate comparison across stocks
+- `trade_duration_histogram.png` - Trade holding period distribution
+
+## Generation
+
+Charts are generated using the `--charts` flag:
+
+```bash
+# Generate backtest charts
+python -m src.main --backtest --charts --list lq45
+
+# Charts are saved in this directory
+ls output/charts/
+```
+
+## Format
+
+- Default format: PNG (high quality)
+- Resolution: 1920x1080 (suitable for presentations)
+- Can be embedded in reports or shared directly
+
+## Notes
+
+- Charts help visualize strategy performance over time
+- Use for strategy optimization and presentation
+- Consider archiving old charts by date or strategy version

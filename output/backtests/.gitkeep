@@ -1,0 +1,32 @@
+# Backtest Results Directory
+
+This directory stores backtesting results and performance reports.
+
+## File Naming Convention
+
+Backtest results are saved here when you use the `--backtest` flag:
+
+```bash
+python -m src.main --backtest --list lq45 > output/backtests/backtest_lq45_20240115.txt
+```
+
+## Example Files
+
+- `backtest_lq45_20240115.txt` - LQ45 backtest results
+- `backtest_BBCA_20240115.txt` - Single stock backtest
+- `backtest_summary_2024Q1.txt` - Quarterly summary
+- `detailed_backtest_20240115.txt` - Detailed trade-by-trade results
+
+## Charts
+
+Performance charts are saved in `output/charts/` directory:
+- `backtest_performance.png` - Equity curve and drawdown charts
+- `backtest_monthly_returns.png` - Monthly return heatmap
+- `backtest_trade_distribution.png` - Win/loss distribution
+
+## Notes
+
+- Text files contain performance metrics (win rate, profit factor, Sharpe ratio)
+- Use `--detailed` flag for trade-by-trade breakdown
+- Use `--charts` flag to generate visual performance reports
+- Keep results organized by date and watchlist for comparison

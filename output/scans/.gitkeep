@@ -1,0 +1,23 @@
+# Scan Results Directory
+
+This directory stores daily scan results from the swing trading scanner.
+
+## File Naming Convention
+
+Results are automatically saved here when you redirect output:
+
+```bash
+python -m src.main --list lq45 > output/scans/scan_YYYYMMDD.txt
+```
+
+## Example Files
+
+- `scan_20240115.txt` - Daily scan results from January 15, 2024
+- `lq45_scan_20240115.txt` - LQ45 watchlist scan
+- `custom_scan_20240115.txt` - Custom watchlist scan
+
+## Notes
+
+- Files are plain text format
+- Can be opened in any text editor
+- Consider cleaning up old files periodically (keep last 30 days)

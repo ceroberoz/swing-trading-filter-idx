@@ -1,9 +1,13 @@
+# ============================================================================
 # Python
+# ============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -16,35 +20,432 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual environments
-venv/
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.local
+.env.*.local
+.venv
 env/
+venv/
 ENV/
-.venv/
+env.bak/
+venv.bak/
 
-# IDE
-.idea/
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# ============================================================================
+# IDE & Editors
+# ============================================================================
+# VS Code
 .vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Vim
 *.swp
 *.swo
 *~
+.*.sw[a-z]
+*.un~
+Session.vim
+.netrwhist
 
-# OS
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ============================================================================
+# Operating System
+# ============================================================================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# Project specific
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# AI Tools & Agents
+# ============================================================================
+# Amp (ampcode.com)
+.agents/
+.amp/
+*.amp
+amp-cache/
+
+# GitHub Copilot
+.copilot/
+
+# Cursor
+.cursor/
+*.cursor
+
+# Codeium
+.codeium/
+
+# Tabnine
+.tabnine/
+
+# OpenCode
+.opencode/
+.git/opencode/
+
+# Windsurf
+.windsurf/
+
+# Replit
+.replit
+replit.nix
+.upm/
+
+# Continue.dev
+.continue/
+
+# Aider
+.aider*
+
+# GPT Engineer
+.gpteng/
+gpt-engineer-*/
+
+# Mentat
+.mentat/
+
+# Smol Developer
+.smol/
+
+# AutoGPT
+auto_gpt_workspace/
+
+# LangChain
+.langchain/
+
+# LlamaIndex
+.llamaindex/
+
+# ChatGPT conversation exports
+chatgpt-*.json
+conversation-*.json
+
+# AI model files (if accidentally added)
+*.gguf
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# ============================================================================
+# Project Specific - Generated Files
+# ============================================================================
+# Cache directory
+cache/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Output directories
+output/
+!output/README.md
+!output/scans/.gitkeep
+!output/backtests/.gitkeep
+!output/charts/.gitkeep
+
+# Logs
+logs/
 *.log
-*.csv
-*.json
-!package.json
+!logs/.gitkeep
+*.log.*
+!logs/.gitkeep
 
-# Secrets
+# Scan results
+scan_*.txt
+*_scan_*.txt
+results_*.txt
+
+# Backtest results
+backtest_*.txt
+backtest_*.csv
+backtest_*.json
+backtest_*.png
+backtest_*.pdf
+
+# Charts and visualizations
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+*.svg
+!docs/*.png
+!README_assets/*.png
+
+# Data files
+data/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.feather
+*.hdf5
+*.h5
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# ============================================================================
+# Security & Secrets
+# ============================================================================
+# API keys and credentials
 .env
 .env.local
+.env.*.local
+secrets.json
+credentials.json
+config.secret.json
 *.pem
 *.key
+*.crt
+*.cer
+*.p12
+*.pfx
+api_key.txt
+token.txt
+password.txt
+
+# SSH keys
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
+
+# AWS
+.aws/
+aws-credentials
+
+# Google Cloud
+*-service-account.json
+*.json.key
+
+# ============================================================================
+# Version Control
+# ============================================================================
+# Git
+.git/
+*.orig
+*.rej
+*.patch
+
+# SVN
+.svn/
+
+# Mercurial
+.hg/
+.hgignore
+
+# ============================================================================
+# Build & Package Managers
+# ============================================================================
+# npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.yarn-integrity
+package-lock.json
+
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Poetry
+poetry.lock
+
+# ============================================================================
+# Documentation Build
+# ============================================================================
+# Sphinx
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# MkDocs
+site/
+
+# ============================================================================
+# Testing
+# ============================================================================
+.tox/
+.pytest_cache/
+*.cover
+htmlcov/
+.coverage
+coverage.xml
+
+# ============================================================================
+# Monitoring & Profiling
+# ============================================================================
+*.prof
+*.lprof
+*.pyprof
+.profraw
+
+# ============================================================================
+# Misc
+# ============================================================================
+# Compressed files (unless explicitly needed)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+
+# System files
+*.pid
+*.seed
+*.pid.lock
+
+# Debug files
+debug/
+debug.log
+*.dmp
+
+# TODO and notes (personal)
+TODO.local
+NOTES.local
+scratch/
+sandbox/
+
+# macOS specific
+.Trash/

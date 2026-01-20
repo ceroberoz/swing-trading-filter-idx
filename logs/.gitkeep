@@ -1,0 +1,51 @@
+# Logs Directory
+
+This directory stores application logs, debug information, and error traces.
+
+## Log Files
+
+### Application Logs
+- `scanner.log` - Daily scanner execution logs
+- `backtest.log` - Backtesting execution logs
+- `error.log` - Error and exception traces
+- `api_calls.log` - Yahoo Finance API request/response logs
+
+### Debug Logs
+- `rate_limiter.log` - Rate limiting events and delays
+- `data_fetch.log` - Data fetching success/failures
+- `analysis.log` - Strategy analysis debug information
+
+## Log Rotation
+
+Logs should be rotated to prevent excessive disk usage:
+- Keep last 30 days of logs
+- Archive older logs to `logs/archive/`
+- Compress archived logs (`.gz` format)
+
+## Example Usage
+
+Enable logging by setting environment variable:
+
+```bash
+# Enable debug logging
+export LOG_LEVEL=DEBUG
+python -m src.main --list lq45
+
+# Check logs
+tail -f logs/scanner.log
+```
+
+## Log Levels
+
+- **DEBUG**: Detailed information for debugging
+- **INFO**: General informational messages
+- **WARNING**: Warning messages (non-critical issues)
+- **ERROR**: Error messages (failures)
+- **CRITICAL**: Critical errors (system failures)
+
+## Notes
+
+- Logs help diagnose issues and track performance
+- Check logs when experiencing rate limit errors
+- Review error.log for troubleshooting failed scans
+- Logs are excluded from git via .gitignore
