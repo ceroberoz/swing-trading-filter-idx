@@ -60,6 +60,11 @@ def fetch_data(ticker, period=None, interval=None, start_date=None, end_date=Non
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
+        # Normalize column names to title case (auto_adjust=True makes them lowercase)
+        df.columns = [
+            col.title() if isinstance(col, str) else col for col in df.columns
+        ]
+
         return df
     except Exception as e:
         print(f"Error fetching data for {ticker}: {e}")
@@ -180,9 +185,22 @@ def _fetch_batch_chunk(
         results = {}
 
         if len(tickers) == 1:
-            # Single ticker - no multi-index
+            # Single ticker - but may still have multi-index with group_by="ticker"
             ticker = tickers[0]
             if not df.empty:
+                # Handle multi-index columns if present
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(1)
+                # Handle case where columns might still be tuples
+                elif df.columns.size > 0 and isinstance(df.columns[0], tuple):
+                    df.columns = [
+                        col[1] if isinstance(col, tuple) else col for col in df.columns
+                    ]
+
+                # Normalize column names to title case
+                df.columns = [
+                    col.title() if isinstance(col, str) else col for col in df.columns
+                ]
                 results[ticker] = df
         else:
             # Multiple tickers - split by ticker
@@ -194,6 +212,20 @@ def _fetch_batch_chunk(
                         else pd.DataFrame()
                     )
                     if not ticker_df.empty:
+                        # Handle case where columns might still be tuples
+                        if ticker_df.columns.size > 0 and isinstance(
+                            ticker_df.columns[0], tuple
+                        ):
+                            ticker_df.columns = [
+                                col[1] if isinstance(col, tuple) else col
+                                for col in ticker_df.columns
+                            ]
+
+                        # Normalize column names to title case
+                        ticker_df.columns = [
+                            col.title() if isinstance(col, str) else col
+                            for col in ticker_df.columns
+                        ]
                         # Drop NaN rows
                         ticker_df = ticker_df.dropna(subset=["Close"])
                         if not ticker_df.empty:
