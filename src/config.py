@@ -64,7 +64,9 @@ VOLUME_STRICT_FILTER = True  # Requires Volume > Vol_Avg
 VOL_RATIO_MIN = 1.2  # Minimum volume ratio for quality signals
 
 # Market Cap Filter (skip small-cap "gorengan")
-ENABLE_MCAP_FILTER = True
+# NOTE: Disabled by default - fetching info for 100+ tickers causes API issues
+# Enable only for small watchlists (< 20 stocks)
+ENABLE_MCAP_FILTER = False
 MIN_MARKET_CAP = 5e12  # 5 Trillion IDR minimum (expands to quality mid-caps)
 # Reference: Large Cap > 50T, Mid Cap 10-50T, Small Cap < 10T
 
@@ -136,13 +138,13 @@ SLIPPAGE_RATE = 0.002  # 0.2% average slippage
 
 # Rate Limiting for Yahoo Finance API
 ENABLE_RATE_LIMITER = True
-REQUEST_DELAY_MIN = 1.5  # Minimum delay between requests (seconds) = 1.5s
-REQUEST_DELAY_MAX = 3.0  # Maximum delay between requests (seconds) = 3s
-MAX_RETRIES = 3  # Maximum retry attempts for failed requests
-RETRY_BACKOFF_BASE = 5  # Exponential backoff multiplier (5^n seconds)
-MAX_CONSECUTIVE_429 = 2  # Stop after N consecutive 429 errors (lowered to fail faster)
-BATCH_SIZE = 10  # Maximum number of tickers to fetch in one batch request
-BATCH_DELAY = 5.0  # Additional delay between batch requests (seconds)
+REQUEST_DELAY_MIN = 2.0  # Minimum delay between requests (seconds)
+REQUEST_DELAY_MAX = 4.0  # Maximum delay between requests (seconds)
+MAX_RETRIES = 2  # Maximum retry attempts (reduced to fail faster)
+RETRY_BACKOFF_BASE = 3  # Exponential backoff multiplier (3^n seconds)
+MAX_CONSECUTIVE_429 = 2  # Stop after N consecutive 429 errors
+BATCH_SIZE = 5  # Smaller batches to avoid DNS thread exhaustion
+BATCH_DELAY = 3.0  # Delay between batch requests (seconds)
 
 # User-Agent rotation for Yahoo Finance requests
 USER_AGENTS = [

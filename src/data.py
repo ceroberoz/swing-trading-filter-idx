@@ -1,3 +1,4 @@
+import os
 import time
 import warnings
 
@@ -10,7 +11,9 @@ from .rate_limiter import get_rate_limiter, retry_with_backoff
 warnings.filterwarnings("ignore", category=FutureWarning, module="yfinance")
 
 # Use local cache directory to avoid SQLite corruption issues
-yf.set_tz_cache_location("./cache")
+cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
+os.makedirs(cache_dir, exist_ok=True)
+yf.set_tz_cache_location(cache_dir)
 
 rate_limiter = get_rate_limiter()
 
@@ -76,7 +79,7 @@ def fetch_data_batch(
 ):
     """
     Fetch historical data for multiple tickers with proper rate limiting.
-    Uses chunking to avoid overwhelming Yahoo Finance API.
+    Uses sequential fetching with small batches to avoid DNS/threading issues.
 
     Args:
         tickers: List of stock ticker symbols
@@ -92,46 +95,54 @@ def fetch_data_batch(
         return {}
 
     results = {}
-    batch_size = config.BATCH_SIZE
-    total_batches = (len(tickers) + batch_size - 1) // batch_size
+    total = len(tickers)
 
-    print(f"Fetching data for {len(tickers)} tickers in {total_batches} batches...")
+    # For large lists, use pure sequential fetching to avoid DNS thread issues
+    use_sequential = total > 20
 
-    # Process tickers in chunks
-    for i in range(0, len(tickers), batch_size):
-        batch = tickers[i : i + batch_size]
-        batch_num = (i // batch_size) + 1
+    if use_sequential:
+        print(f"Fetching data for {total} tickers (sequential mode)...")
+        for idx, ticker in enumerate(tickers, 1):
+            print(f"  [{idx}/{total}] {ticker}...", end="\r")
+            try:
+                df = fetch_data(ticker, period, interval, start_date, end_date)
+                if df is not None and not df.empty:
+                    results[ticker] = df
+            except Exception as e:
+                # Skip failed tickers silently to avoid spam
+                continue
+            # Small delay between tickers
+            if idx < total:
+                time.sleep(0.5)
+    else:
+        # For small lists, use batch fetching
+        batch_size = config.BATCH_SIZE
+        total_batches = (total + batch_size - 1) // batch_size
+        print(f"Fetching data for {total} tickers in {total_batches} batches...")
 
-        print(
-            f"Batch {batch_num}/{total_batches}: Fetching {len(batch)} tickers...",
-            end="\r",
-        )
+        for i in range(0, total, batch_size):
+            batch = tickers[i : i + batch_size]
+            batch_num = (i // batch_size) + 1
+            print(f"  Batch {batch_num}/{total_batches}...", end="\r")
 
-        try:
-            # Fetch batch with rate limiting
-            batch_result = _fetch_batch_chunk(
-                batch, period, interval, start_date, end_date
-            )
-            results.update(batch_result)
+            try:
+                batch_result = _fetch_batch_chunk(
+                    batch, period, interval, start_date, end_date
+                )
+                results.update(batch_result)
+                if i + batch_size < total:
+                    time.sleep(config.BATCH_DELAY)
+            except Exception:
+                # Fall back to individual fetching
+                for ticker in batch:
+                    try:
+                        df = fetch_data(ticker, period, interval, start_date, end_date)
+                        if df is not None and not df.empty:
+                            results[ticker] = df
+                    except Exception:
+                        continue
 
-            # Extra delay between batches (except for last batch)
-            if i + batch_size < len(tickers):
-                time.sleep(config.BATCH_DELAY)
-
-        except Exception as e:
-            print(f"\nError fetching batch {batch_num}: {e}")
-            # Fall back to individual fetching for this batch
-            print(f"Falling back to individual fetching for batch {batch_num}...")
-            for ticker in batch:
-                try:
-                    df = fetch_data(ticker, period, interval, start_date, end_date)
-                    if df is not None and not df.empty:
-                        results[ticker] = df
-                except Exception as ticker_error:
-                    print(f"Failed to fetch {ticker}: {ticker_error}")
-                    continue
-
-    print(f"\nSuccessfully fetched {len(results)}/{len(tickers)} tickers")
+    print(f"\nSuccessfully fetched {len(results)}/{total} tickers")
     return results
 
 
