@@ -254,14 +254,17 @@ def main():
 
     print("-" * 60)
 
-    if config.ENABLE_MCAP_FILTER:
+    # Fetch stock info if needed for filtering or display
+    fetch_stock_info = config.ENABLE_MCAP_FILTER or config.SHOW_MCAP_INFO
+    if fetch_stock_info:
+        purpose = "market cap filter" if config.ENABLE_MCAP_FILTER else "display"
         print(
-            f"{Fore.CYAN}Step 2/3: Fetching stock info for market cap filter...{Style.RESET_ALL}"
+            f"{Fore.CYAN}Step 2/3: Fetching stock info ({purpose})...{Style.RESET_ALL}"
         )
-        stock_infos = data.fetch_stock_info_batch(tickers_to_scan)
+        stock_infos = data.fetch_stock_info_batch(list(dfs.keys()))  # Only fetch for successful tickers
         print("-" * 60)
     else:
-        stock_infos = {t: None for t in tickers_to_scan}
+        stock_infos = {}
 
     print(f"{Fore.CYAN}Step 3/3: Analyzing tickers...{Style.RESET_ALL}")
     total_tickers = len(tickers_to_scan)
@@ -269,16 +272,15 @@ def main():
     for idx, ticker in enumerate(tickers_to_scan, 1):
         print(f"Analyzing {idx}/{total_tickers}: {ticker}...", end="\r")
 
-        # Market cap filter
+        # Get stock info (for display and/or filtering)
+        stock_info = stock_infos.get(ticker)
+        mcap = stock_info.get("market_cap") if stock_info else None
+
+        # Market cap filter (skip small-cap if enabled)
         if config.ENABLE_MCAP_FILTER:
-            stock_info = stock_infos.get(ticker)
-            mcap = stock_info.get("market_cap") if stock_info else None
             if mcap is not None and mcap < config.MIN_MARKET_CAP:
                 skipped_mcap += 1
                 continue
-        else:
-            stock_info = None
-            mcap = None
 
         df = dfs.get(ticker) if dfs else None
         if df is not None:

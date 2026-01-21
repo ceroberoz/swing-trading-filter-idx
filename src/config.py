@@ -68,6 +68,10 @@ VOL_RATIO_MIN = 1.2  # Minimum volume ratio for quality signals
 # Enable only for small watchlists (< 20 stocks)
 ENABLE_MCAP_FILTER = False
 MIN_MARKET_CAP = 5e12  # 5 Trillion IDR minimum (expands to quality mid-caps)
+
+# Display market cap info (without filtering)
+# Set True to show MCap column (adds ~1 min for 45 stocks)
+SHOW_MCAP_INFO = True
 # Reference: Large Cap > 50T, Mid Cap 10-50T, Small Cap < 10T
 
 # Market Cap Tiering (optional - for tiered filtering rules)
