@@ -1,8 +1,8 @@
 import argparse
 import os
-import random
 import sys
 import time
+from datetime import datetime
 
 import pandas as pd
 from colorama import Fore, Style, init
@@ -76,6 +76,41 @@ def show_available_lists():
             filepath = os.path.join(config.WATCHLISTS_DIR, f)
             count = len(config.load_watchlist(name))
             print(f"  {name:15} ({count} stocks)")
+
+
+def save_scan_results(results, headers, scan_mode, market_ctx):
+    """Save scan results to output/scans/ with timestamp prefix."""
+    # Create output directory
+    output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output", "scans")
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Extract watchlist name from scan_mode
+    if "Watchlist:" in scan_mode:
+        list_name = scan_mode.split(":")[-1].strip().split()[0]
+    else:
+        list_name = "manual"
+    filename = f"{timestamp}_{list_name}_scan.txt"
+    filepath = os.path.join(output_dir, filename)
+
+    # Write results
+    with open(filepath, "w") as f:
+        f.write(f"Swing Trading Scanner - IDX\n")
+        f.write(f"{'=' * 50}\n")
+        f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Mode: {scan_mode}\n")
+        f.write(f"Market Regime: {market_ctx.get('market_regime', 'UNKNOWN')}\n")
+        f.write(f"Strategy: EMA{config.FAST_EMA}/EMA{config.SLOW_EMA} Crossover\n")
+        f.write(f"{'=' * 50}\n\n")
+
+        if results:
+            f.write(tabulate(results, headers=headers, tablefmt="simple"))
+            f.write(f"\n\nTotal: {len(results)} setups found\n")
+        else:
+            f.write("No setups found matching the criteria.\n")
+
+    print(f"{Fore.CYAN}Results saved to: {filepath}{Style.RESET_ALL}")
 
 
 def run_backtest(args):
@@ -279,27 +314,33 @@ def main():
     print(" " * 60, end="\r")  # Clear the progress line
     print(f"{Fore.GREEN}Analysis complete!{Style.RESET_ALL}\n")
 
+    headers = [
+        "Ticker",
+        "Signal",
+        "Price",
+        "S/R",
+        "RSI",
+        "W.Trend",
+        "MCap",
+        "Strategy",
+    ]
+
     if results:
-        headers = [
-            "Ticker",
-            "Signal",
-            "Price",
-            "S/R",
-            "RSI",
-            "W.Trend",
-            "MCap",
-            "Strategy",
-        ]
-        print(tabulate(results, headers=headers, tablefmt="fancy_grid"))
+        table_output = tabulate(results, headers=headers, tablefmt="fancy_grid")
+        print(table_output)
         skip_msg = f" (Skipped {skipped_mcap} small-cap)" if skipped_mcap > 0 else ""
         print(
             f"\n{Fore.GREEN}Scan Complete. Found {len(results)} setups.{skip_msg}{Style.RESET_ALL}"
         )
     else:
+        table_output = "No setups found."
         skip_msg = f" (Skipped {skipped_mcap} small-cap)" if skipped_mcap > 0 else ""
         print(
             f"\n{Fore.YELLOW}No setups found matching the criteria today.{skip_msg}{Style.RESET_ALL}"
         )
+
+    # Save results to output/scans/ with timestamp
+    save_scan_results(results, headers, scan_mode, market_ctx)
 
 
 if __name__ == "__main__":
