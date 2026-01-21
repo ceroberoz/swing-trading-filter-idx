@@ -10,10 +10,10 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Find Python - prefer venv, fallback to system
-PYTHON="./venv/bin/python"
+# Find Python - prefer venv_314 (working), fallback to venv or system
+PYTHON="./venv_314/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
-    PYTHON="./venv_314/bin/python"
+    PYTHON="./venv/bin/python"
 fi
 if [[ ! -x "$PYTHON" ]]; then
     PYTHON="$(command -v python3 || command -v python)"
