@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from . import config
+from . import patterns
 
 
 def calculate_ema(series, period):
@@ -233,6 +234,9 @@ def get_investment_strategy(analysis, weekly_ctx, market_ctx):
     risk_on = (market_ctx or {}).get("risk_on", True)
     price_vs_ema = analysis.get("price_vs_ema_pct", 0)
     sr_score = analysis.get("sr_score", 0)
+    macd_hist_slope = analysis.get("macd_hist_slope", 0)
+    rsi_slope = analysis.get("rsi_slope", 0)
+    ema_spread_slope = analysis.get("ema_spread_slope", 0)
 
     score = 0
 
@@ -278,7 +282,32 @@ def get_investment_strategy(analysis, weekly_ctx, market_ctx):
     elif price_vs_ema > 10:
         score -= 1
 
+    # Slope Analysis Scoring
+    if macd_hist_slope > 0:
+        score += 1
+    elif macd_hist_slope < 0:
+        score -= 1
+
+    if rsi_slope > 0:
+        # Only add points for rising RSI if not overbought
+        if rsi < 70:
+            score += 1
+    elif rsi_slope < 0:
+        score -= 1
+
+    if ema_spread_slope > 0:
+        score += 1
+
     score += sr_score
+
+    # Candle Pattern Scoring
+    candle_score = analysis.get("candle_score", 0)
+    score += candle_score
+
+    # Strong Bearish Pattern Penalty
+    detected_patterns = analysis.get("patterns", [])
+    if "Bearish Engulfing" in detected_patterns or "Shooting Star" in detected_patterns:
+        score -= 2
 
     if score >= 5:
         return "BUY ALL"
@@ -482,7 +511,36 @@ def analyze_ticker(df, market_ctx=None):
     swing_data = find_swing_levels(df, lookback=20)
     sr_analysis = analyze_support_resistance(current_price, pivot_data, swing_data)
 
+    # Calculate slopes (current - previous)
+    macd_hist_slope = float(last_row["MACD_Hist"] - prev_row["MACD_Hist"])
+    rsi_slope = float(last_row["RSI"] - prev_row["RSI"])
+
+    curr_spread = float(last_row["EMA_Fast"] - last_row["EMA_Slow"])
+    prev_spread = float(prev_row["EMA_Fast"] - prev_row["EMA_Slow"])
+    ema_spread_slope = curr_spread - prev_spread
+
+    # Generate movement summary
+    movements = []
+    movements.append(f"MACD {'Rising' if macd_hist_slope > 0 else 'Falling'}")
+    movements.append(f"RSI {'Rising' if rsi_slope > 0 else 'Falling'}")
+    movements.append(f"Trend {'Strengthening' if ema_spread_slope > 0 else 'Weakening'}")
+    movement_summary = ", ".join(movements)
+
+    # Detect Candlestick Patterns
+    pattern_data = patterns.detect_patterns(df)
+    detected_patterns = pattern_data["patterns"]
+
+    candle_score = 0
+    for p in detected_patterns:
+        if p in ["Hammer", "Bullish Engulfing"]:
+            candle_score += 1
+        elif p in ["Shooting Star", "Bearish Engulfing"]:
+            candle_score -= 1
+        # Doji is neutral
+
     base_analysis = {
+        "patterns": detected_patterns,
+        "candle_score": candle_score,
         "signal": signal,
         "is_setup": is_setup,
         "current_price": current_price,
@@ -490,6 +548,10 @@ def analyze_ticker(df, market_ctx=None):
         "target_profit_range": f"{config.TARGET_PROFIT_MIN * 100:.0f}-{config.TARGET_PROFIT_MAX * 100:.0f}%",
         "rsi": last_row["RSI"],
         "macd_hist": last_row["MACD_Hist"],
+        "macd_hist_slope": macd_hist_slope,
+        "rsi_slope": rsi_slope,
+        "ema_spread_slope": ema_spread_slope,
+        "movement_summary": movement_summary,
         "vol_ratio": last_row["Volume"] / last_row["Vol_Avg"]
         if last_row["Vol_Avg"] > 0
         else 0,
